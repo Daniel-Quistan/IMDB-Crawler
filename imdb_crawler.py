@@ -56,6 +56,7 @@ class imdb_bot():
         list_of_movies = list_of_movies[0:self.n_movies]
         return list_of_movies
 
+
     def get_movie_data(self):
         """
         Function that clicks each movie on list_of_movies and grabs
@@ -64,9 +65,8 @@ class imdb_bot():
         for movie in self.list_of_movies:
             movie.send_keys(Keys.CONTROL + Keys.RETURN)
             self.change_windows()
-            #gets Data
+            self.get_data_from_movie()
             self.driver.close()
-            self.change_windows()
 
 
     def change_windows(self):
@@ -76,6 +76,22 @@ class imdb_bot():
         windows = self.driver.window_handles
         self.driver.switch_to.window(windows[1])
 
+
+    def get_data_from_movie(self):
+        """Functions that get's desired data from inside the movie URL"""
+        WebDriverWait(self.driver, 5).until(
+            EC.presence_of_element_located(
+                (By.CLASS_NAME, 'titleBar')
+                ))
+        parent = self.driver.find_element_by_xpath(
+            '//*/div[@class="originalTitle"]'
+            )
+        child = parent.find_element_by_tag_name('span')
+        title = parent.text.replace(child.text, '')
+        year = self.driver.find_element_by_id('titleYear').text
+        rating = self.driver.find_element_by_class_name('ratingValue').text
+
+        print(title, year, rating)
 
 
 if __name__ == '__main__':
