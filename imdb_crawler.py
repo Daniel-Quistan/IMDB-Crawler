@@ -1,5 +1,9 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 class imdb_bot():
     """
@@ -20,12 +24,7 @@ class imdb_bot():
         self.driver.get(self.movies_url) # Go to IMDB top 250 page.
         self.n_movies = n_movies # Set the number of movies to crawl.
         self.list_of_movies = self.get_list_of_movies()
-        movie_names = []
-        for movie in self.list_of_movies:
-            movie_names.append(movie.text)
-        print(movie_names)
-        self.driver.quit()
-
+        self.get_movie_data()
 
 
     def driver_config(self):
@@ -45,11 +44,38 @@ class imdb_bot():
         """
         Get's the page elements of the number of movies specified.
         """
+
+        WebDriverWait(self.driver, 5).until(
+            EC.element_to_be_clickable(
+                (By.XPATH, '//*/tbody[@class="lister-list"]/tr/td[1]')
+                ))
+
         list_of_movies = self.driver.find_elements_by_xpath(
-            '//*/tbody[@class="lister-list"]/tr'
+            '//*/tbody[@class="lister-list"]/tr/td[1]/a'
             )
         list_of_movies = list_of_movies[0:self.n_movies]
         return list_of_movies
+
+    def get_movie_data(self):
+        """
+        Function that clicks each movie on list_of_movies and grabs
+        data from it's page.
+        """
+        for movie in self.list_of_movies:
+            movie.send_keys(Keys.CONTROL + Keys.RETURN)
+            self.change_windows()
+            #gets Data
+            self.driver.close()
+            self.change_windows()
+
+
+    def change_windows(self):
+        """
+        Changes windows from window 0 to 1.
+        """
+        windows = self.driver.window_handles
+        self.driver.switch_to.window(windows[1])
+
 
 
 if __name__ == '__main__':
