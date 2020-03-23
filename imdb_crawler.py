@@ -25,6 +25,7 @@ class imdb_bot():
         self.n_movies = n_movies # Set the number of movies to crawl.
         self.list_of_movies = self.get_list_of_movies()
         self.get_movie_data()
+        self.driver.quit()
 
 
     def driver_config(self):
@@ -67,14 +68,19 @@ class imdb_bot():
             self.change_windows()
             self.get_data_from_movie()
             self.driver.close()
+            self.change_windows()
 
 
     def change_windows(self):
         """
-        Changes windows from window 0 to 1.
+        Changes windows from window 0 to 1 and vice-versa.
         """
         windows = self.driver.window_handles
-        self.driver.switch_to.window(windows[1])
+        if len(windows) != 1:
+            self.driver.switch_to.window(windows[1])
+        else:
+            self.driver.switch_to.window(windows[0])
+
 
 
     def get_data_from_movie(self):
@@ -90,9 +96,10 @@ class imdb_bot():
         title = parent.text.replace(child.text, '')
         year = self.driver.find_element_by_id('titleYear').text
         rating = self.driver.find_element_by_class_name('ratingValue').text
+        rating = rating.split('/')[0]
 
         print(title, year, rating)
 
 
 if __name__ == '__main__':
-    imdb_bot = imdb_bot(1)
+    imdb_bot = imdb_bot(5)
