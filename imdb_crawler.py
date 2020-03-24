@@ -116,8 +116,10 @@ class imdb_bot():
 
         print(title, year, rating, director, cast)
 
+
     def get_recomendations(self):
         """Inside a movie webpage get all movies recommended by IMDB."""
+
         self.driver.find_element_by_id(
             'titleRecs'
             ).location_once_scrolled_into_view
@@ -127,17 +129,26 @@ class imdb_bot():
         last_movie_name = ''
 
         while True:
+            time.sleep(0.5)
 
-            movie_name = self.driver.find_element_by_xpath(
-                '//*/div[@class = "rec-title"]/a/b[text() != "" and text() != "{}"]'.format(last_movie_name)
-            ).text
+            movie_overview = self.driver.find_element_by_xpath(
+                '//*/div[@class = "rec_overview" and @style != "display: none;"]'
+            )
+
+            movie_name = movie_overview.find_element_by_xpath(
+                './/*/div[@class = "rec-title"]'
+                ).text
+
+            movie_rating = movie_overview.find_element_by_class_name(
+                "rating-rating"
+                ).text.split('/')[0]
 
             if last_movie_name == movie_name:
                 break
 
             time.sleep(0.5)
+            print(movie_name, movie_rating)
 
-            print(movie_name)
 
             last_movie_name = movie_name
 
