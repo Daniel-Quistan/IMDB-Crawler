@@ -4,6 +4,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+import time
 
 class imdb_bot():
     """
@@ -89,16 +90,38 @@ class imdb_bot():
             EC.presence_of_element_located(
                 (By.CLASS_NAME, 'titleBar')
                 ))
-        parent = self.driver.find_element_by_xpath(
+        title_1 = self.driver.find_element_by_xpath(
             '//*/div[@class="originalTitle"]'
             )
-        child = parent.find_element_by_tag_name('span')
-        title = parent.text.replace(child.text, '')
+        title_2 = title_1.find_element_by_tag_name('span')
+        title = title_1.text.replace(title_2.text, '')
         year = self.driver.find_element_by_id('titleYear').text
+        year = year.replace('(', '').replace(')', '')
         rating = self.driver.find_element_by_class_name('ratingValue').text
         rating = rating.split('/')[0]
+        director = self.driver.find_element_by_xpath(
+            '//*/h4[@class = "inline" and contains(text(), "Director")]/following-sibling::a'
+        ).text
+        stars = self.driver.find_elements_by_xpath(
+            '//*/h4[@class = "inline" and contains(text(), "Stars")]/following-sibling::a'
+        )
+        actors =[]
+        for star in stars[0: len(stars)-1]:
+            actors.append(star.text)
+        cast = ', '.join(actors)
 
-        print(title, year, rating)
+        recomendations = self.get_recomendations()
+
+
+        print(title, year, rating, director, cast)
+
+    def get_recomendations(self):
+        """Inside a movie webpage get all movies recommended by IMDB."""
+        self.driver.find_element_by_id(
+            'titleRecs'
+            ).location_once_scrolled_into_view
+        time.sleep(5)
+
 
 
 if __name__ == '__main__':
