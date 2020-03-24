@@ -56,6 +56,7 @@ class imdb_bot():
             '//*/tbody[@class="lister-list"]/tr/td[1]/a'
             )
         list_of_movies = list_of_movies[0:self.n_movies]
+
         return list_of_movies
 
 
@@ -120,7 +121,32 @@ class imdb_bot():
         self.driver.find_element_by_id(
             'titleRecs'
             ).location_once_scrolled_into_view
-        time.sleep(5)
+
+        """ Loop to get all recommended movies."""
+
+        last_movie_name = ''
+
+        while True:
+
+            movie_name = self.driver.find_element_by_xpath(
+                '//*/div[@class = "rec-title"]/a/b[text() != "" and text() != "{}"]'.format(last_movie_name)
+            ).text
+
+            if last_movie_name == movie_name:
+                break
+
+            time.sleep(0.5)
+
+            print(movie_name)
+
+            last_movie_name = movie_name
+
+            next_button = self.driver.find_element_by_xpath(
+                '//*/span[@class = "btn2_text" and contains(text(), "Next")]'
+            )
+
+            self.driver.execute_script("arguments[0].click();", next_button)
+
 
 
 
