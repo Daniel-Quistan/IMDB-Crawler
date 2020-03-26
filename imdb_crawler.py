@@ -1,3 +1,4 @@
+import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
@@ -68,7 +69,8 @@ class imdb_bot():
         for movie in self.list_of_movies:
             movie.send_keys(Keys.CONTROL + Keys.RETURN)
             self.change_windows()
-            self.get_data_from_movie()
+            movie_data = self.get_data_from_movie()
+            self.send_to_excel(movie_data)
             self.driver.close()
             self.change_windows()
 
@@ -112,9 +114,9 @@ class imdb_bot():
         cast = ', '.join(actors)
 
         recomendations = self.get_recomendations()
+        movie_info = [title, year, rating, director, cast]
 
-
-        print(title, year, rating, director, cast)
+        return movie_info, recomendations
 
 
     def get_recomendations(self):
@@ -127,6 +129,8 @@ class imdb_bot():
         """ Loop to get all recommended movies."""
 
         last_movie_name = ''
+
+        recomendations = []
 
         while True:
             time.sleep(0.5)
@@ -147,7 +151,8 @@ class imdb_bot():
                 break
 
             time.sleep(0.5)
-            print(movie_name, movie_rating)
+
+            recomendations.append(movie_name + ' ' + '(' + movie_rating + ')')
 
 
             last_movie_name = movie_name
@@ -158,7 +163,20 @@ class imdb_bot():
 
             self.driver.execute_script("arguments[0].click();", next_button)
 
+        all_recomendations = '\n'.join(recomendations)
 
+        return all_recomendations
+
+
+    def send_to_excel(self, movie_data):
+        movie_data = movie_data[0] + [movie_data[1]]
+        df_movie = pd.DataFrame([movie_data],
+        columns=[
+            'title', 'year', 'rating', 'director', 'stars', 'recomendations'
+            ])
+        base = pd.read_excel('movies_base.xlsx').reset_index(drop=True)
+        base = pd.concat([base, df_movie], axis=0)
+        base.to_excel('movies_base.xlsx', index=False)
 
 
 if __name__ == '__main__':
